@@ -1,3 +1,5 @@
+// I would comment this up, but honestly its too hacked together for me to even know what it does. I will however point out what you need to change to make it work for you
+//Also dont forget to make the config.json file, or run setup.bat for an easy config. 
 const request = require('request');
 const axios = require("axios");
 const querystring = require("querystring")
@@ -24,10 +26,10 @@ function setSlackStatus(token, status) {
 
 function getLatestCommit() {
 	const options = {  
-    url: 'https://api.github.com/users/dragonballzeke/events/public',
+    url: 'https://api.github.com/users/dragonballzeke/events/public', //Change `dragonballzeke` to your github username
     method: 'GET',
     headers: {
-        'User-Agent': 'dragonballzeke',
+        'User-Agent': 'dragonballzeke' //same here
 	}
 	}
 	request(options, function(err, res, body) {  
@@ -40,7 +42,7 @@ function getLatestCommit() {
 	if(event){
 		let firstCommitMessage =  event.payload.commits[0];
 		const commitMessage =  firstCommitMessage ? firstCommitMessage.message : '';
-		const slackMessage =  `latest commit '${commitMessage}' in repo '${event.repo.name}' at ${event.created_at}`;
+		const slackMessage =  `latest commit '${commitMessage}' in repo '${event.repo.name}'`; //here you can customize the message. 
 		console.log('slackMessage', slackMessage);
 		setSlackStatus(config.token,slackMessage);
 		return slackMessage;
@@ -50,4 +52,4 @@ function getLatestCommit() {
 })
 }
 
-getLatestCommit();
+getLatestCommit(); 
