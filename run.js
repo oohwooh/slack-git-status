@@ -1,12 +1,13 @@
+const request = require('request');
 const axios = require("axios");
 const querystring = require("querystring")
-setSlackStatus("xoxp-2153102999-43747307477-169771286404-a162977af9ba28c0f912f58e353ca7e5","test")
+const config = require('./config.json')
 function setSlackStatus(token, status) {
     return axios.post("https://slack.com/api/users.profile.set",
         querystring.stringify({
             token: token,
             profile: JSON.stringify({
-										"status_text": "once i finish my code my last commit will be here",
+										"status_text": status,
 										"status_emoji": ":github:"
 })
         }), {
@@ -20,3 +21,33 @@ function setSlackStatus(token, status) {
            console.error("Set Slack status error: %s", error); 
         });
 }
+
+function getLatestCommit() {
+	const options = {  
+    url: 'https://api.github.com/users/dragonballzeke/events/public',
+    method: 'GET',
+    headers: {
+        'User-Agent': 'dragonballzeke',
+	}
+	}
+	request(options, function(err, res, body) {  
+    let json = JSON.parse(body);
+	console.log("debug");
+	//console.log(json);
+	formatCommitMessage(json);
+	function formatCommitMessage(json){
+	let event = json.find(x=> x.type === 'PushEvent');
+	if(event){
+		let firstCommitMessage =  event.payload.commits[0];
+		const commitMessage =  firstCommitMessage ? firstCommitMessage.message : '';
+		const slackMessage =  `latest commit '${commitMessage}' in repo '${event.repo.name}' at ${event.created_at}`;
+		console.log('slackMessage', slackMessage);
+		setSlackStatus(config.token,slackMessage);
+		return slackMessage;
+	}
+	return '';
+}	
+})
+}
+
+getLatestCommit();
